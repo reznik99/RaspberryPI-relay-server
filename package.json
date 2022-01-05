@@ -1,0 +1,29 @@
+{
+  "name": "raspberrypi-relay-server",
+  "version": "0.0.1",
+  "description": "Relay server for authentication and command proxying for RaspberryPI Robot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reznik99/RaspberryPI-relay-server.git"
+  },
+  "author": "Francesco Gorini",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/reznik99/RaspberryPI-relay-server/issues"
+  },
+  "homepage": "https://github.com/reznik99/RaspberryPI-relay-server#readme",
+  "dependencies": {
+    "body-parser": "^1.19.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.2",
+    "jsonwebtoken": "^8.5.1",
+    "passport": "^0.5.2",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "ws": "^8.4.0"
+  }
+}
