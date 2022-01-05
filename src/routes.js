@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const jwtSecret = require('./config/config')
+const { SECRET } = require('./config/config')
 
 const createRoutes = (app, passport) => {
 
@@ -13,8 +13,10 @@ const createRoutes = (app, passport) => {
                 console.error(info.message)
                 res.status(403).send(info.message)
             } else {
+                console.log(user)
+                const robot = req.body.robot ? true : false
                 req.logIn(user, () => {
-                    const token = jwt.sign(user, jwtSecret.secret, {
+                    const token = jwt.sign({ ...user, robot }, SECRET, {
                         expiresIn: 60 * 60,
                     })
                     res.status(200).send({
@@ -30,7 +32,7 @@ const createRoutes = (app, passport) => {
     app.get('/validateToken', (req, res, next) => {
         console.log(`/validateToken called`)
         passport.authenticate('jwt', (err, user, info) => {
-            if (err || info !== undefined) {
+            if (err || info) {
                 console.error(info.message || err)
                 res.status(401).send({ valid: false }) // token expired!
             } else {
@@ -40,4 +42,6 @@ const createRoutes = (app, passport) => {
     })
 }
 
-module.exports = createRoutes
+module.exports = {
+    createRoutes
+}
