@@ -32,8 +32,8 @@ module.exports = {
             // Handlers
             ws.on('pong', () => { ws.isAlive = true })
             ws.on('close', () => {
-                console.log(`Closing websocket for ${ws.session?.username}-${ws.session?.id}`)
-                wsClients.delete(ws.session?.id)
+                console.log(`Closing websocket for ${ws.session.username}-${ws.session.id}`)
+                wsClients.delete(ws.session.id)
                 ws.close()
             })
             ws.on('message', (data) => {
@@ -48,22 +48,18 @@ module.exports = {
                                 const targetWS = wsClients.get(parsedData.target)
                                 if (!targetWS)
                                     ws.send("User not online")
-                                else {
-                                    // targetWS.send(parsedData.data)
-                                    wss.clients.forEach((client) => {
-                                        client.send(parsedData.data)
-                                    })
-                                }
+                                else
+                                    targetWS.send(parsedData.data)
                                 break
                             default:
                                 throw new Error("Invalid command")
                         }
                     } catch (err) {
-                        console.error(`Websocket ${ws.session?.username}-${ws.session?.id} invalid command`)
+                        console.error(`Websocket ${ws.session.username}-${ws.session.id} invalid command`)
                         ws.send("Invalid command")
                     }
                 } catch (err) {
-                    console.error(`Websocket ${ws.session?.username}-${ws.session?.id} terminating, invalid JWT`)
+                    console.error(`Websocket ${ws.session.username}-${ws.session.id} terminating, invalid JWT`)
                     ws.close()
                 }
             })
@@ -71,7 +67,7 @@ module.exports = {
 
         const interval = setInterval(() => {
             wss.clients.forEach((ws) => {
-                console.log(`Pinging socket: ${ws.session?.username}-${ws.session?.id}`)
+                console.log(`Pinging socket: ${ws.session.username}-${ws.session.id}`)
                 if (!ws.isAlive) return ws.terminate()
                 ws.isAlive = false
                 ws.ping(() => { })
