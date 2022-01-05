@@ -4,7 +4,7 @@ const { wsClients } = require('./websocket')
 
 const createRoutes = (app, passport) => {
 
-    app.post('/login', (req, res, next) => {
+    app.post('/rpi-relay/login', (req, res, next) => {
         passport.authenticate('login', (err, user, info) => {
             if (err) {
                 console.error(`error ${err}`)
@@ -30,7 +30,7 @@ const createRoutes = (app, passport) => {
         })(req, res, next)
     })
 
-    app.get('/listRobots', (req, res, next) => {
+    app.get('/rpi-relay/listRobots', (req, res, next) => {
         console.log(`/listRobots called`)
         passport.authenticate('jwt', (err, user, info) => {
             if (err || info) {
@@ -46,7 +46,7 @@ const createRoutes = (app, passport) => {
         })(req, res, next)
     })
 
-    app.get('/validateToken', (req, res, next) => {
+    app.get('/rpi-relay/validateToken', (req, res, next) => {
         console.log(`/validateToken called`)
         passport.authenticate('jwt', (err, user, info) => {
             if (err || info) {
