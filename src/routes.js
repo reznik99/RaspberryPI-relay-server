@@ -9,13 +9,9 @@ const createRoutes = (app, passport) => {
                 console.error(`error ${err}`)
                 res.status(500)
             }
-
             else if (info !== undefined) {
                 console.error(info.message)
-                if (info.message === 'Invalid username and/or password')
-                    res.status(401).send(info.message)
-                else
-                    res.status(403).send(info.message)
+                res.status(403).send(info.message)
             } else {
                 req.logIn(user, () => {
                     const token = jwt.sign(user, jwtSecret.secret, {
