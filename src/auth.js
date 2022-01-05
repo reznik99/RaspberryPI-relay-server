@@ -24,7 +24,7 @@ module.exports = {
 
             // Valid
             const id = uuid.v4()
-            return done(null, { username, password, id });
+            return done(null, { username, id });
         }))
 
         const opts = {

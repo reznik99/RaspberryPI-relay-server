@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { SECRET } = require('./config/config')
+const { wsClients } = require('./websocket')
 
 const createRoutes = (app, passport) => {
 
@@ -25,6 +26,22 @@ const createRoutes = (app, passport) => {
                         message: 'user found & logged in',
                     })
                 })
+            }
+        })(req, res, next)
+    })
+
+    app.get('/listRobots', (req, res, next) => {
+        console.log(`/listRobots called`)
+        passport.authenticate('jwt', (err, user, info) => {
+            if (err || info) {
+                console.error(info.message || err)
+                res.status(401).send({ valid: false }) // token expired!
+            } else {
+                const robotList = []
+                wsClients.forEach((client, name) => {
+                    if (client.session?.robot) robotList.push(client.session)
+                })
+                res.status(200).send(robotList)
             }
         })(req, res, next)
     })
