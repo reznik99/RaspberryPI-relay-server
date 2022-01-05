@@ -19,7 +19,7 @@ module.exports = {
                 const decoded = jwt.verify(token, SECRET)
                 console.log(decoded)
                 // Store socket
-                wsClients.set(decoded.username, ws)
+                wsClients.set(decoded.id, ws)
                 ws.isAlive = true
                 ws.session = decoded
                 console.log(`New Websocket connection established for ${decoded.username}-${decoded.id}`)
