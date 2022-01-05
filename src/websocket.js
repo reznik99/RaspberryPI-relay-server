@@ -2,6 +2,7 @@ const url = require('url')
 const wslib = require('ws')
 const jwt = require('jsonwebtoken')
 const { SECRET } = require('./config/config')
+const { WebSocket } = require('ws')
 
 const wsClients = new Map()
 
@@ -10,7 +11,6 @@ module.exports = {
     configureWebsocket: (expressServer) => {
         // Define the WebSocket server. Here, the server mounts to the `/ws` route of the Express JS server.
         const wss = new wslib.Server({ server: expressServer, path: '/ws' })
-
 
         wss.on('connection', (ws, req) => {
             const token = url.parse(req.url, true).query.token
@@ -44,12 +44,15 @@ module.exports = {
                     try {
                         const parsedData = JSON.parse(data)
                         switch (parsedData.cmd.toUpperCase()) {
-                            case "MSG":
+                            case "SEND":
                                 const targetWS = wsClients.get(parsedData.target)
                                 if (!targetWS)
                                     ws.send("User not online")
                                 else {
-                                    targetWS.send(ws.session.phone_no + ": " + parsedData.data)
+                                    // targetWS.send(parsedData.data)
+                                    wss.clients.forEach((client) => {
+                                        client.send(parsedData.data)
+                                    })
                                 }
                                 break
                             default:
