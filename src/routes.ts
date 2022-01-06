@@ -1,8 +1,7 @@
-const jwt = require('jsonwebtoken')
-const { SECRET } = require('./config/config')
-const { wsClients } = require('./websocket')
+import { sign } from 'jsonwebtoken'
+import { wsClients } from './websocket'
 
-const createRoutes = (app, passport) => {
+export const createRoutes = (app, passport) => {
 
     app.post('/rpi-relay/login', (req, res, next) => {
         passport.authenticate('login', (err, user, info) => {
@@ -17,7 +16,7 @@ const createRoutes = (app, passport) => {
                 console.log(user)
                 const robot = req.body.robot ? true : false
                 req.logIn(user, () => {
-                    const token = jwt.sign({ ...user, robot }, SECRET, {
+                    const token = sign({ ...user, robot }, process.env.JWT_SECRET, {
                         expiresIn: 60 * 60,
                     })
                     res.status(200).send({
@@ -57,8 +56,4 @@ const createRoutes = (app, passport) => {
             }
         })(req, res, next)
     })
-}
-
-module.exports = {
-    createRoutes
 }
