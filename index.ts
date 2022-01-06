@@ -1,11 +1,12 @@
+import * as dotenv from "dotenv"
+dotenv.config({ path: __dirname + '/.env' })
 
-const express = require('express'),
-    passport = require('passport'),
-    bodyParser = require('body-parser'),
-    { createRoutes } = require('./src/routes'),
-    { authInit } = require('./src/auth'),
-    { configureWebsocket } = require('./src/websocket')
-
+import express from 'express'
+import passport from 'passport'
+import bodyParser from 'body-parser'
+import { createRoutes } from './src/routes'
+import { authInit } from './src/auth'
+import { configureWebsocket } from './src/websocket'
 const PORT = process.env.PORT || 1234
 const app = express()
 
