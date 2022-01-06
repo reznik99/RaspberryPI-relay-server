@@ -2,7 +2,7 @@
 const LocalStrategy = require('passport-local').Strategy
 const JWTstrategy = require('passport-jwt').Strategy
 const ExtractJWT = require('passport-jwt').ExtractJwt
-import uuid from 'uuid'
+import { v4 } from 'uuid'
 
 export const authInit = (passport) => {
     passport.serializeUser(function (user, done) {
@@ -15,7 +15,7 @@ export const authInit = (passport) => {
             return done(null, false, { message: 'Invalid username and/or password' });
 
         // Valid
-        const id = uuid.v4()
+        const id = v4()
         return done(null, { username, id });
     }))
 
