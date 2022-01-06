@@ -14,9 +14,9 @@ export const createRoutes = (app, passport) => {
                 res.status(403).send(info.message)
             } else {
                 console.log(user)
-                const robot = req.body.robot ? true : false
+                const isRobot = req.body.isRobot ? true : false
                 req.logIn(user, () => {
-                    const token = sign({ ...user, robot }, process.env.JWT_SECRET, {
+                    const token = sign({ ...user, isRobot }, process.env.JWT_SECRET, {
                         expiresIn: 60 * 60,
                     })
                     res.status(200).send({
@@ -38,7 +38,7 @@ export const createRoutes = (app, passport) => {
             } else {
                 const robotList = []
                 wsClients.forEach((client, name) => {
-                    if (client.session?.robot) robotList.push(client.session)
+                    if (client.session.isRobot) robotList.push(client.session)
                 })
                 res.status(200).send(robotList)
             }

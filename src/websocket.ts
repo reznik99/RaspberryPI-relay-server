@@ -3,12 +3,13 @@ import { WebSocket, Server, RawData } from 'ws'
 import jwt from 'jsonwebtoken'
 
 interface Socket extends WebSocket {
-    isAlive: boolean
     session: Session
+    isAlive: boolean
 }
 interface Session extends jwt.JwtPayload {
     id: string
     username: string
+    isRobot: boolean
 }
 interface Command {
     cmd: string
