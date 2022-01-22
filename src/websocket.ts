@@ -82,11 +82,14 @@ const handleData = (sender: Socket, data: string) => {
             case "TX_CMD":
                 targetWS.send(parsedData.data)
                 break
+            case "TX_PING":
+                sender.send(data)
+                break
             default:
                 throw new Error("Invalid command!")
         }
     } catch (err) {
-        console.error(`Websocket ${sender.session.username}-${sender.session.id} invalid command`)
+        console.error(`Error: Websocket ${sender.session.username}-${sender.session.id} invalid command`)
         sender.send(err)
     }
 }
