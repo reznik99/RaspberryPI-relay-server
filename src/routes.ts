@@ -1,5 +1,5 @@
 import { sign } from 'jsonwebtoken'
-import { wsClients } from './websocket'
+import { robots } from './websocket'
 
 export const createRoutes = (app, passport) => {
 
@@ -37,8 +37,8 @@ export const createRoutes = (app, passport) => {
                 res.status(401).send({ valid: false }) // token expired!
             } else {
                 const robotList = []
-                wsClients.forEach((client, name) => {
-                    if (client.session.isRobot) robotList.push(client.session)
+                robots.forEach((client, name) => {
+                    if (client.robot) robotList.push(client.robot.session)
                 })
                 res.status(200).send(robotList)
             }
