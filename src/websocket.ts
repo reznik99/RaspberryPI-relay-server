@@ -158,8 +158,6 @@ const handleData = (sender: Socket, data: string) => {
                         ...parsedData,
                         sender: sender.session.id
                     }
-                    console.log(parsedData)
-                    console.log(targetController)
 
                     if (targetViewer && targetViewer.session.id === parsedData.target) {
                         // Forward ping packet to viewer for e2e ping calc
