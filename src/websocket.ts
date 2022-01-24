@@ -142,7 +142,7 @@ const handleData = (sender: Socket, data: string) => {
                 break
             case "TX_PING":
                 // Ping meant for server, reply
-                if (parsedData.target !== "server") {
+                if (parsedData.target === "server") {
                     const srvPingTX: Command = {
                         ...parsedData,
                         target: sender.session.id,
@@ -157,15 +157,16 @@ const handleData = (sender: Socket, data: string) => {
                         ...parsedData,
                         sender: sender.session.id
                     }
-                    if (targetRobot) {
-                        // Forward ping packet to robot for e2e ping calc
-                        targetRobot.send(JSON.stringify(pingTX))
-                    } else if (targetViewer) {
+
+                    if (targetViewer) {
                         // Forward ping packet to viewer for e2e ping calc
                         targetViewer.send(JSON.stringify(pingTX))
                     } else if (targetController) {
                         // Forward ping packet to controller for e2e ping calc
                         targetController.send(JSON.stringify(pingTX))
+                    } else if (targetRobot) {
+                        // Forward ping packet to robot for e2e ping calc
+                        targetRobot.send(JSON.stringify(pingTX))
                     }
                 }
                 break
