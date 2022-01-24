@@ -129,10 +129,10 @@ const pingSocket = (ws: Socket) => {
 const handleData = (sender: Socket, data: string) => {
     try {
         const parsedData = JSON.parse(data) as Command
-        const targetRobotInstance = [...robots].find((val) => val[1].robot.session.id === parsedData.target || val[1].robot.session.id === parsedData.sender)
+        const targetRobotInstance = [...robots].find((val) => val[1].robot.session.id === parsedData.target || val[1].robot.session.id === sender.session.id)
         const targetRobot = targetRobotInstance ? targetRobotInstance[1].robot : null
         const targetViewer = targetRobotInstance ? targetRobotInstance[1].viewers.find(viewer => viewer.session.id === parsedData.target) : null
-        const targetController = targetRobotInstance ? targetRobotInstance[1].viewers.find(controller => controller.session.id === parsedData.target) : null
+        const targetController = targetRobotInstance && targetRobotInstance[1].controller.session.id === parsedData.target ? targetRobotInstance[1].controller : null
         // If target defined but not present throw error
         if (parsedData.target && (!targetRobot && !targetViewer && !targetController && parsedData.target !== "server")) throw new Error("Target not online!")
         // Handle command
@@ -161,12 +161,15 @@ const handleData = (sender: Socket, data: string) => {
 
                     if (targetViewer && targetViewer.session.id === parsedData.target) {
                         // Forward ping packet to viewer for e2e ping calc
+                        console.log("Proxy ping to Viewer")
                         targetViewer.send(JSON.stringify(pingTX))
                     } else if (targetController && targetController.session.id === parsedData.target) {
                         // Forward ping packet to controller for e2e ping calc
+                        console.log("Proxy ping to Controller")
                         targetController.send(JSON.stringify(pingTX))
                     } else if (targetRobot && targetRobot.session.id === parsedData.target) {
                         // Forward ping packet to robot for e2e ping calc
+                        console.log("Proxy ping to Robot")
                         targetRobot.send(JSON.stringify(pingTX))
                     }
                 }
