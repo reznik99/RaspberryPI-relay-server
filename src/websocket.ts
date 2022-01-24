@@ -159,13 +159,13 @@ const handleData = (sender: Socket, data: string) => {
                     }
                     console.log(pingTX)
 
-                    if (targetViewer.session.id === parsedData.target) {
+                    if (targetViewer && targetViewer.session.id === parsedData.target) {
                         // Forward ping packet to viewer for e2e ping calc
                         targetViewer.send(JSON.stringify(pingTX))
-                    } else if (targetController.session.id === parsedData.target) {
+                    } else if (targetController && targetController.session.id === parsedData.target) {
                         // Forward ping packet to controller for e2e ping calc
                         targetController.send(JSON.stringify(pingTX))
-                    } else if (targetRobot.session.id === parsedData.target) {
+                    } else if (targetRobot && targetRobot.session.id === parsedData.target) {
                         // Forward ping packet to robot for e2e ping calc
                         targetRobot.send(JSON.stringify(pingTX))
                     }
