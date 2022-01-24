@@ -77,6 +77,7 @@ export const configureWebsocket = (expressServer) => {
                 const [id, Lobby] = lobby
                 // Robot has disconnected. Delete Lobby
                 if (ws.session.id === id) {
+                    // TODO: Close all other sockets in this lobby
                     robots.delete(id)
                 }
                 // Viewer has disconnected. Remove from lobby
@@ -129,7 +130,7 @@ const pingSocket = (ws: Socket) => {
 const handleData = (sender: Socket, data: string) => {
     try {
         const parsedData = JSON.parse(data) as Command
-        const targetRobotInstance = [...robots].find((val) => val[1].robot.session.id === parsedData.target || val[1].robot.session.id === parsedData.sender)
+        const targetRobotInstance = [...robots].find((val) => val[0] === parsedData.target || val[0] === sender.session.id)
         const targetRobot = targetRobotInstance ? targetRobotInstance[1].robot : null
         const targetViewer = targetRobotInstance ? targetRobotInstance[1].viewers.find(viewer => viewer.session.id === parsedData.target) : null
         const targetController = targetRobotInstance ? targetRobotInstance[1].controller : null
@@ -157,7 +158,8 @@ const handleData = (sender: Socket, data: string) => {
                         ...parsedData,
                         sender: sender.session.id
                     }
-                    console.log(pingTX)
+                    console.log(parsedData)
+                    console.log(targetController)
 
                     if (targetViewer && targetViewer.session.id === parsedData.target) {
                         // Forward ping packet to viewer for e2e ping calc
