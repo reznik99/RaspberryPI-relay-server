@@ -15,6 +15,7 @@ interface Command {
     cmd: string
     data: string
     target: string
+    sender?: string
 }
 
 interface Lobby {
@@ -129,15 +130,45 @@ const handleData = (sender: Socket, data: string) => {
     try {
         const parsedData = JSON.parse(data) as Command
         const targetRobot = [...robots].find((val) => val[1].robot.session.id === parsedData.target)[1].robot
+        const targetUser = [...robots].map((val): Socket => {
+            const lobby = val[1]
+            const targetViewer = lobby.viewers.find((viewer) => viewer.session.id === parsedData.target)
+            if (targetViewer) return targetViewer
+            else if (lobby.controller.session.id === parsedData.target) return lobby.controller
+            else return null
+        })[0]
         // If target defined but not present throw error
         if (parsedData.target && !targetRobot) throw new Error("Target not online!")
         // Handle command
         switch (parsedData.cmd.toUpperCase()) {
             case "TX_CMD":
-                targetRobot.send(parsedData.data)
+                targetRobot.send(data)
                 break
             case "TX_PING":
-                sender.send(data)
+                // Ping meant for server, reply
+                if (!targetRobot) {
+                    const srvPingTX: Command = {
+                        ...parsedData,
+                        target: sender.session.id,
+                        sender: "server"
+                    }
+                    // Send ping response to client for server ping
+                    sender.send(JSON.stringify(srvPingTX))
+                }
+                // Ping meant for robot or user
+                else {
+                    const pingTX: Command = {
+                        ...parsedData,
+                        sender: sender.session.id
+                    }
+                    if (targetRobot) {
+                        // Forward ping packet to robot for e2e ping calc
+                        targetRobot.send(JSON.stringify(pingTX))
+                    } else if (targetUser) {
+                        // Forward ping packet to robot for e2e ping calc
+                        targetUser.send(JSON.stringify(pingTX))
+                    }
+                }
                 break
             default:
                 throw new Error("Invalid command!")
