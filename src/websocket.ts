@@ -129,16 +129,12 @@ const pingSocket = (ws: Socket) => {
 const handleData = (sender: Socket, data: string) => {
     try {
         const parsedData = JSON.parse(data) as Command
-        const targetRobot = [...robots].find((val) => val[1].robot.session.id === parsedData.target)[1].robot
-        const targetUser = [...robots].map((val): Socket => {
-            const lobby = val[1]
-            const targetViewer = lobby.viewers.find((viewer) => viewer.session.id === parsedData.target)
-            if (targetViewer) return targetViewer
-            else if (lobby.controller.session.id === parsedData.target) return lobby.controller
-            else return null
-        })[0]
+        const targetRobotInstance = [...robots].find((val) => val[1].robot.session.id === parsedData.target || val[1].robot.session.id === parsedData.sender)
+        const targetRobot = targetRobotInstance ? targetRobotInstance[1].robot : null
+        const targetViewer = targetRobotInstance ? targetRobotInstance[1].viewers.find(viewer => viewer.session.id === parsedData.target) : null
+        const targetController = targetRobotInstance ? targetRobotInstance[1].viewers.find(viewer => viewer.session.id === parsedData.target) : null
         // If target defined but not present throw error
-        if (parsedData.target && !targetRobot) throw new Error("Target not online!")
+        if (parsedData.target && !targetRobot && !targetViewer, targetController && parsedData.target !== "server") throw new Error("Target not online!")
         // Handle command
         switch (parsedData.cmd.toUpperCase()) {
             case "TX_CMD":
@@ -146,7 +142,7 @@ const handleData = (sender: Socket, data: string) => {
                 break
             case "TX_PING":
                 // Ping meant for server, reply
-                if (!targetRobot) {
+                if (parsedData.target !== "server") {
                     const srvPingTX: Command = {
                         ...parsedData,
                         target: sender.session.id,
@@ -164,9 +160,12 @@ const handleData = (sender: Socket, data: string) => {
                     if (targetRobot) {
                         // Forward ping packet to robot for e2e ping calc
                         targetRobot.send(JSON.stringify(pingTX))
-                    } else if (targetUser) {
-                        // Forward ping packet to robot for e2e ping calc
-                        targetUser.send(JSON.stringify(pingTX))
+                    } else if (targetViewer) {
+                        // Forward ping packet to viewer for e2e ping calc
+                        targetViewer.send(JSON.stringify(pingTX))
+                    } else if (targetController) {
+                        // Forward ping packet to controller for e2e ping calc
+                        targetController.send(JSON.stringify(pingTX))
                     }
                 }
                 break
