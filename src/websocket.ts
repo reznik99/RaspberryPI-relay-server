@@ -98,12 +98,12 @@ export const configureWebsocket = (expressServer) => {
             try {
                 // Verify JWT if it has expired
                 jwt.verify(token, process.env.JWT_SECRET)
-                handleData(ws, data.toString())
             }
             catch (err) {
                 console.error(`Websocket ${ws.session.username}-${ws.session.id} terminating, invalid JWT`)
                 ws.close()
             }
+            handleData(ws, data.toString())
         })
     })
 
@@ -175,6 +175,6 @@ const handleData = (sender: Socket, data: string) => {
         }
     } catch (err) {
         console.error(`Error: Websocket ${sender.session.username}-${sender.session.id} invalid command`)
-        sender.send(err)
+        console.error(`Error: ${err}`)
     }
 }
