@@ -129,10 +129,10 @@ const pingSocket = (ws: Socket) => {
 const handleData = (sender: Socket, data: string) => {
     try {
         const parsedData = JSON.parse(data) as Command
-        const targetRobotInstance = [...robots].find((val) => val[1].robot.session.id === parsedData.target || val[1].robot.session.id === sender.session.id)
+        const targetRobotInstance = [...robots].find((val) => val[1].robot.session.id === parsedData.target || val[1].robot.session.id === parsedData.sender)
         const targetRobot = targetRobotInstance ? targetRobotInstance[1].robot : null
         const targetViewer = targetRobotInstance ? targetRobotInstance[1].viewers.find(viewer => viewer.session.id === parsedData.target) : null
-        const targetController = targetRobotInstance && targetRobotInstance[1].controller.session.id === parsedData.target ? targetRobotInstance[1].controller : null
+        const targetController = targetRobotInstance ? targetRobotInstance[1].controller : null
         // If target defined but not present throw error
         if (parsedData.target && (!targetRobot && !targetViewer && !targetController && parsedData.target !== "server")) throw new Error("Target not online!")
         // Handle command
