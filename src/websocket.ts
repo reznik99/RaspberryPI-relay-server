@@ -145,6 +145,7 @@ const handleData = (sender: Socket, data: string) => {
                 if (parsedData.target === "server") {
                     if (targetRobotInstance[1].viewers.length == 0) {
                         console.log("No viewers for stream frame")
+                        break
                     }
                     console.log("Proxing frame to Viewers")
                     // Proxy video frame to all connected viewers
