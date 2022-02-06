@@ -143,10 +143,13 @@ const handleData = (sender: Socket, data: string) => {
                 break
             case "TX_FRAME":
                 if (parsedData.target === "server") {
-                    console.log("Proxy frame to Viewers")
+                    if (targetRobotInstance[1].viewers.length == 0) {
+                        console.log("No viewers for stream frame")
+                    }
+                    console.log("Proxing frame to Viewers")
                     // Proxy video frame to all connected viewers
                     targetRobotInstance[1].viewers.forEach((viewerSock) => {
-                        viewerSock.send(data)
+                        viewerSock.send(parsedData.data)
                     })
                 }
             case "TX_PING":
