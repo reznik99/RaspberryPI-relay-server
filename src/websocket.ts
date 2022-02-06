@@ -1,5 +1,5 @@
 import url from 'url'
-import { WebSocket, Server, RawData } from 'ws'
+import { WebSocket, Server } from 'ws'
 import jwt from 'jsonwebtoken'
 
 interface Socket extends WebSocket {
@@ -22,6 +22,7 @@ interface Lobby {
     viewers: Socket[]
     controller: Socket
     robot: Socket
+    streamSrc: Socket
 }
 
 export const robots: Map<string, Lobby> = new Map()
@@ -54,13 +55,20 @@ export const configureWebsocket = (expressServer) => {
             }
             // new socket is a robot
             if (!lobbyID && !view && decoded.isRobot) {
-                console.log(`New Websocket robot ${decoded.username}-${decoded.id}`)
-                const lobby: Lobby = {
-                    viewers: [],
-                    controller: null,
-                    robot: ws
+                if (robots.has(decoded.id)) {
+                    console.log(`New Websocket robot stream ${decoded.username}-${decoded.id}`)
+                    robots.get(lobbyID).streamSrc = ws
                 }
-                robots.set(decoded.id, lobby)
+                else {
+                    console.log(`New Websocket robot ${decoded.username}-${decoded.id}`)
+                    const lobby: Lobby = {
+                        viewers: [],
+                        controller: null,
+                        robot: ws,
+                        streamSrc: null
+                    }
+                    robots.set(decoded.id, lobby)
+                }
             }
         } catch (err) {
             console.error("Websocket connection rejected, invalid JWT")
@@ -89,21 +97,23 @@ export const configureWebsocket = (expressServer) => {
                 }
                 // Controller has disconnected. Remove from lobby
                 else if (Lobby.controller === ws) {
+                    Lobby.streamSrc?.close()
                     Lobby.controller = null
+                    Lobby.streamSrc = null
                 }
             }
             // Close websocket at server level
             ws.close()
         })
         ws.on('message', (data) => {
-            try {
-                // Verify JWT if it has expired
-                // jwt.verify(token, process.env.JWT_SECRET)
-            }
-            catch (err) {
-                console.error(`Websocket ${ws.session.username}-${ws.session.id} terminating, invalid JWT`)
-                ws.close()
-            }
+            // try {
+            //     // Verify JWT if it has expired
+            //     jwt.verify(token, process.env.JWT_SECRET)
+            // }
+            // catch (err) {
+            //     console.error(`Websocket ${ws.session.username}-${ws.session.id} terminating, invalid JWT`)
+            //     ws.close()
+            // }
             handleData(ws, data.toString())
         })
     })
