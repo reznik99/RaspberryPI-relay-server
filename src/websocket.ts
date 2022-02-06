@@ -152,6 +152,7 @@ const handleData = (sender: Socket, data: string) => {
                         viewerSock.send(parsedData.data)
                     })
                 }
+                break
             case "TX_PING":
                 // Ping meant for server, reply
                 if (parsedData.target === "server") {
