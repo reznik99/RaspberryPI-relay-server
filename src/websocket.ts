@@ -111,7 +111,7 @@ export const configureWebsocket = (expressServer) => {
     const interval = setInterval(() => {
         robots.forEach((lobby) => {
             // Ping viewer sockets
-            lobby.viewers.forEach((ws) => pingSocket(ws))
+            // lobby.viewers.forEach((ws) => pingSocket(ws))
             // Ping controller socket
             if (lobby.controller) pingSocket(lobby.controller)
             // Ping controller socket
