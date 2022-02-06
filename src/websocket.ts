@@ -98,7 +98,7 @@ export const configureWebsocket = (expressServer) => {
         ws.on('message', (data) => {
             try {
                 // Verify JWT if it has expired
-                jwt.verify(token, process.env.JWT_SECRET)
+                // jwt.verify(token, process.env.JWT_SECRET)
             }
             catch (err) {
                 console.error(`Websocket ${ws.session.username}-${ws.session.id} terminating, invalid JWT`)
