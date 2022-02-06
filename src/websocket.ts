@@ -141,6 +141,13 @@ const handleData = (sender: Socket, data: string) => {
             case "TX_CMD":
                 targetRobot.send(data)
                 break
+            case "TX_FRAME":
+                if (parsedData.target === "server") {
+                    // Proxy video frame to all connected viewers
+                    targetRobotInstance[1].viewers.forEach((viewerSock) => {
+                        viewerSock.send(data)
+                    })
+                }
             case "TX_PING":
                 // Ping meant for server, reply
                 if (parsedData.target === "server") {
