@@ -121,8 +121,11 @@ export const configureWebsocket = (expressServer) => {
 }
 
 const pingSocket = (ws: Socket) => {
+    if (!ws.isAlive) {
+        console.error(`Socket time out: ${ws.session.username}-${ws.session.id}`)
+        return ws.terminate()
+    }
     console.log(`Pinging socket: ${ws.session.username}-${ws.session.id}`)
-    if (!ws.isAlive) return ws.terminate()
     ws.isAlive = false
     ws.ping(() => { })
 }
