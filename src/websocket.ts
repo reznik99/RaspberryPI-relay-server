@@ -183,7 +183,7 @@ const handleData = (sender: Socket, data: string) => {
                 }
                 break
             default:
-                throw new Error("Invalid command!")
+                throw new Error("Invalid command!: " + data.toString())
         }
     } catch (err) {
         console.error(`Error: Websocket ${sender.session.username}-${sender.session.id} invalid command`)
