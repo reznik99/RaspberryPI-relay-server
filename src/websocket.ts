@@ -142,7 +142,9 @@ const handleData = (sender: Socket, data: string) => {
                 targetRobot.send(data)
                 break
             case "TX_FRAME":
+                console.log("TX_FRAME recieved: " + data)
                 if (parsedData.target === "server") {
+                    console.log("Proxy frame to Viewers")
                     // Proxy video frame to all connected viewers
                     targetRobotInstance[1].viewers.forEach((viewerSock) => {
                         viewerSock.send(data)
