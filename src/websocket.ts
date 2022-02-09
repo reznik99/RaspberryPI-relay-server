@@ -88,27 +88,33 @@ export const configureWebsocket = (expressServer) => {
             // Delete socket instance from lobby
             for (let lobby of robots) {
                 const [id, Lobby] = lobby
-                // Robot has disconnected. Delete Lobby
+                // Robot has disconnected. Close all sockets and delete Lobby
                 if (ws.session.id === id) {
-                    // TODO: Close all other sockets in this lobby
+                    // Close viewer's sockets
+                    Lobby.viewers.forEach(viewerSock => viewerSock.close())
+                    // Close controller's socket
+                    Lobby.controller?.close()
+                    // Close streamSrc Socket
+                    Lobby.streamSrc?.close()
+                    // Close robot socket
+                    Lobby.robot?.close()
+                    // Delete lobby
                     robots.delete(id)
                 }
                 // Viewer has disconnected. Remove from lobby
                 else if (Lobby.viewers.includes(ws)) {
                     const index = Lobby.viewers.indexOf(ws)
                     if (index > -1) {
+                        Lobby.viewers.at(index).close()
                         Lobby.viewers.splice(index, 1)
                     }
                 }
                 // Controller has disconnected. Remove from lobby
                 else if (Lobby.controller === ws) {
-                    Lobby.streamSrc?.close()
+                    Lobby.controller?.close()
                     Lobby.controller = null
-                    Lobby.streamSrc = null
                 }
             }
-            // Close websocket at server level
-            ws.close()
         })
         ws.on('message', (data) => {
             // try {
@@ -129,8 +135,9 @@ export const configureWebsocket = (expressServer) => {
             // lobby.viewers.forEach((ws) => pingSocket(ws))
             // Ping controller socket
             if (lobby.controller) pingSocket(lobby.controller)
-            // Ping controller socket
+            // Ping robot sockets
             if (lobby.robot) pingSocket(lobby.robot)
+            if (lobby.streamSrc) pingSocket(lobby.streamSrc)
         })
     }, 10000)
 }
@@ -150,10 +157,9 @@ const handleData = (sender: Socket, data: string) => {
         const parsedData = JSON.parse(data) as Command
         const targetRobotInstance = [...robots].find((val) => val[0] === parsedData.target || val[0] === sender.session.id)
         const targetRobot = targetRobotInstance ? targetRobotInstance[1].robot : null
-        const targetViewer = targetRobotInstance ? targetRobotInstance[1].viewers.find(viewer => viewer.session.id === parsedData.target) : null
         const targetController = targetRobotInstance ? targetRobotInstance[1].controller : null
         // If target defined but not present throw error
-        if (parsedData.target && (!targetRobot && !targetViewer && !targetController && parsedData.target !== "server")) throw new Error(`Target ${parsedData.target} not online!`)
+        if (parsedData.target && (!targetRobot && !targetController && parsedData.target !== "server")) throw new Error(`Target ${parsedData.target} not online!`)
         // Handle command
         switch (parsedData.cmd.toUpperCase()) {
             case "TX_CMD":
@@ -189,12 +195,7 @@ const handleData = (sender: Socket, data: string) => {
                         ...parsedData,
                         sender: sender.session.id
                     }
-
-                    if (targetViewer && targetViewer.session.id === parsedData.target) {
-                        // Forward ping packet to viewer for e2e ping calc
-                        console.log("Proxy ping to Viewer")
-                        targetViewer.send(JSON.stringify(pingTX))
-                    } else if (targetController && targetController.session.id === parsedData.target) {
+                    if (targetController && targetController.session.id === parsedData.target) {
                         // Forward ping packet to controller for e2e ping calc
                         console.log("Proxy ping to Controller")
                         targetController.send(JSON.stringify(pingTX))
