@@ -1,5 +1,5 @@
 import url from 'url'
-import { WebSocket, Server } from 'ws'
+import { WebSocket, Server, ServerOptions } from 'ws'
 import jwt from 'jsonwebtoken'
 
 interface Socket extends WebSocket {
@@ -29,7 +29,12 @@ export const robots: Map<string, Lobby> = new Map()
 
 export const configureWebsocket = (expressServer) => {
     // Define the WebSocket server. Here, the server mounts to the `/ws` route of the Express JS server.
-    const wss = new Server({ server: expressServer, path: '/rpi-relay/ws' })
+    const sockServerOptions: ServerOptions = {
+        server: expressServer,
+        path: '/rpi-relay/ws',
+        perMessageDeflate: true
+    }
+    const wss = new Server(sockServerOptions)
 
     wss.on('connection', (ws: Socket, req) => {
         const queryString = url.parse(req.url, true).query
@@ -57,7 +62,7 @@ export const configureWebsocket = (expressServer) => {
             if (!lobbyID && !view && decoded.isRobot) {
                 if (robots.has(decoded.id)) {
                     console.log(`New Websocket robot stream ${decoded.username}-${decoded.id}`)
-                    robots.get(lobbyID).streamSrc = ws
+                    robots.get(decoded.id).streamSrc = ws
                 }
                 else {
                     console.log(`New Websocket robot ${decoded.username}-${decoded.id}`)
