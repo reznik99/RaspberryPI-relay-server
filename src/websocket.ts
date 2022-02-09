@@ -153,7 +153,7 @@ const handleData = (sender: Socket, data: string) => {
         const targetViewer = targetRobotInstance ? targetRobotInstance[1].viewers.find(viewer => viewer.session.id === parsedData.target) : null
         const targetController = targetRobotInstance ? targetRobotInstance[1].controller : null
         // If target defined but not present throw error
-        if (parsedData.target && (!targetRobot && !targetViewer && !targetController && parsedData.target !== "server")) throw new Error("Target not online!")
+        if (parsedData.target && (!targetRobot && !targetViewer && !targetController && parsedData.target !== "server")) throw new Error(`Target ${parsedData.target} not online!`)
         // Handle command
         switch (parsedData.cmd.toUpperCase()) {
             case "TX_CMD":
@@ -209,7 +209,6 @@ const handleData = (sender: Socket, data: string) => {
                 throw new Error("Invalid command!: " + data.toString())
         }
     } catch (err) {
-        console.error(`Error: Websocket ${sender.session.username}-${sender.session.id} invalid command`)
-        console.error(`Error: ${err}`)
+        console.error(`Error: Websocket ${sender.session.username}-${sender.session.id} | ${err}`)
     }
 }
