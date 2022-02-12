@@ -51,6 +51,7 @@ export const configureWebsocket = (expressServer) => {
             // new socket is a viewer
             if (lobbyID && view === "true") {
                 console.log(`New Websocket viewer ${decoded.username}-${decoded.id}`)
+                ws.binaryType = 'arraybuffer'
                 robots.get(lobbyID).viewers.push(ws)
             }
             // new socket is a controller
@@ -62,6 +63,7 @@ export const configureWebsocket = (expressServer) => {
             if (!lobbyID && !view && decoded.isRobot) {
                 if (robots.has(decoded.id)) {
                     console.log(`New Websocket robot stream ${decoded.username}-${decoded.id}`)
+                    ws.binaryType = 'arraybuffer'
                     robots.get(decoded.id).streamSrc = ws
                 }
                 else {
@@ -117,15 +119,21 @@ export const configureWebsocket = (expressServer) => {
             }
         })
         ws.on('message', (data) => {
-            // try {
-            //     // Verify JWT if it has expired
-            //     jwt.verify(token, process.env.JWT_SECRET)
-            // }
-            // catch (err) {
-            //     console.error(`Websocket ${ws.session.username}-${ws.session.id} terminating, invalid JWT`)
-            //     ws.close()
-            // }
-            handleData(ws, data.toString())
+            if (ws.binaryType === 'arraybuffer' || data instanceof ArrayBuffer) {
+                // Must be H264 stream
+                const targetRobotInstance = [...robots].find((val) => val[0] === ws.session.id)
+                if (targetRobotInstance[1].viewers.length == 0) console.log("No viewers for H264 stream")
+                else {
+                    console.log("Proxing H264 stream to Viewers")
+                    // Proxy H264 stream to all connected viewers
+                    targetRobotInstance[1].viewers.forEach((viewerSock) => {
+                        viewerSock.send(data)
+                    })
+                }
+            }
+            else {
+                handleData(ws, data.toString())
+            }
         })
     })
 
