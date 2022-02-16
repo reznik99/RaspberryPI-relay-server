@@ -144,7 +144,16 @@ export const configureWebsocket = (expressServer) => {
             // Ping controller socket
             if (lobby.controller) pingSocket(lobby.controller)
             // Ping robot sockets
-            if (lobby.robot) pingSocket(lobby.robot)
+            if (lobby.robot) {
+                pingSocket(lobby.robot)
+                // Query statistics from robot
+                const statsTX: Command = {
+                    cmd: "TX_STATS",
+                    target: lobby.robot?.session?.id,
+                    data: ''
+                }
+                lobby.robot.send(JSON.stringify(statsTX))
+            }
             if (lobby.streamSrc) pingSocket(lobby.streamSrc)
         })
     }, 10000)
@@ -212,6 +221,13 @@ const handleData = (sender: Socket, data: string) => {
                         console.log("Proxy ping to Robot")
                         targetRobot.send(JSON.stringify(pingTX))
                     }
+                }
+                break
+            case "TX_STATS":
+                // Proxy statistics from robot to controller
+                if (parsedData.target === "server" && targetController) {
+                    const statsTX: Command = { ...parsedData }
+                    targetController.send(JSON.stringify(statsTX))
                 }
                 break
             default:
