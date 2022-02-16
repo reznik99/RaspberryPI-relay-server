@@ -149,6 +149,7 @@ export const configureWebsocket = (expressServer) => {
                 // Query statistics from robot
                 const statsTX: Command = {
                     cmd: "TX_STATS",
+                    sender: 'server',
                     target: lobby.robot?.session?.id,
                     data: ''
                 }
